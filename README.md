@@ -1,7 +1,7 @@
 crane
 =====
 
-Identification of *C*ombinatorially dys*R*egul*A*ted sub*NE*tworks
+Identification of Combinatorially dysRegulAted subNEtworks
 
 ## References
 
