@@ -5,8 +5,6 @@ import pdb
 import networkx as nx
 import numpy as np
 
-# from src.dysreg.crane import Crane
-# from src.dysreg.expression import Expression
 from crane.core import Core
 from crane.expression import Expression
 
