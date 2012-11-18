@@ -4,6 +4,7 @@ import unittest
 import numpy as np
 
 from crane.neural_network import NeuralNetwork
+from crane.expression import Expression
 
 class TestNeuralNetwork(unittest.TestCase):
     def setUp(self):
@@ -15,9 +16,11 @@ class TestNeuralNetwork(unittest.TestCase):
                                          [0,0,0,0,1,1]])
 
         self.states = ((1,2,3), (2,4))
+        self.expression = Expression(self.expression_data, self.entrezs, self.labels,
+                binarize=False)
 
         self.n = NeuralNetwork(self.states)
-        self.n.train(self.expression_data, self.labels)
+        self.n.train(self.expression)
 
     def tearDown(self):
         pass

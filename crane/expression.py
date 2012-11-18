@@ -2,6 +2,7 @@
 
 import numpy as np
 from sklearn.preprocessing import scale
+from itertools import izip
 
 class Expression:
     def __init__(self, expr_data, entrezs, labels, binarize=True, alpha=0.25):
@@ -59,7 +60,8 @@ class Expression:
         else:
             return len(self.labels)
 
-    def labels(self):
-        '''Returns a numpy array representing the labels of samples in expression dataset'''
-        return self.labels
+    def iter_sample_label(self):
+        '''Generator for samples and labels'''
+        for sample, label in izip(self.sample_gene, self.labels):
+            yield (sample, label)
 

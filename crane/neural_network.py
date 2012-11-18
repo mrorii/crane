@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-from itertools import izip
 import numpy as np
 
 from pybrain.structure.networks.feedforward import FeedForwardNetwork
@@ -36,27 +35,24 @@ class NeuralNetwork:
         n.sortModules()
         self.n = n
 
-    def train(self, expression_data, labels):
-        expression_data = np.array(expression_data)
-
+    def train(self, expression):
         ds = SupervisedDataSet(self.num_features, 1)
-        for sample, label in izip(expression_data.T, labels):
+        for sample, label in expression.iter_sample_label():
             feature = self._calc_feature(sample)
             ds.addSample(feature, (label,))
 
-        # train
         self.trainer = BackpropTrainer(self.n, ds)
         self.trainer.trainUntilConvergence()
 
-        self.expression_data = expression_data
-        self.ds              = ds
+        self.expression = expression
+        self.ds         = ds
 
     def activate(self, sample):
-        assert len(sample) == self.expression_data.shape[0]
+        assert len(sample) == self.expression.num_genes()
         sample  = np.array(sample)
         feature = self._calc_feature(sample)
         return int(np.round(self.n.activate(feature)))
 
     def _calc_feature(self, sample):
-        return sample[ self.feature_indices ]
+        return sample[self.feature_indices]
 
