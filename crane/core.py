@@ -50,7 +50,7 @@ class Core:
                 self.T.append(state)
             return
 
-        Q_b = sorted(Q, key=lambda s: - s.calc_info())
+        Q_b = sorted(Q, key=lambda s: - s.calc_info())[:self.b]
 
         for new_state in Q_b:
             self.extend_state(new_state)
