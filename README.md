@@ -1,7 +1,6 @@
-crane
-=====
+# crane
 
-Identification of Combinatorially dysRegulAted subNEtworks
+Identification of <b>C</b>ombinatorially dys<b>R</b>egul<b>A</b>ted sub<b>NE</b>tworks
 
 ## References
 
