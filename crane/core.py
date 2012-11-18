@@ -11,12 +11,13 @@ class Core:
         self.b          = b
         self.j          = j
         self.T          = []
+        self.C          = (0, 1)
 
     def run(self):
         for i, node in enumerate(self.graph.nodes_iter()):
             if (i % 1000) == 0:
                 logging.info('Node %5d completed (%s states)' % (i, len(self.T)))
-            for e in (0, 1):
+            for e in self.C:
                 state = State([node], [e], self.expr_data)
                 self.extend_state(state)
 
@@ -33,7 +34,7 @@ class Core:
             if g_k < g_i: continue
             if g_k in state: continue
 
-            for e in (0, 1):
+            for e in self.C:
                 new_state = State(state.genes + [g_k], state.expr_ptn + [e], self.expr_data)
                 redundant = False
 

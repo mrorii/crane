@@ -15,6 +15,7 @@ class State:
 
         self.calced_info = False
         self.info        = None
+        self.C           = (0, 1)
 
     def most_recent_gene(self):
         assert len(self.genes) > 0
@@ -22,16 +23,13 @@ class State:
 
     def _calc_info(self, genes, expr_ptn, bound=False):
         assert len(genes) == len(expr_ptn)
-
         data = Expression(*self.expr_data.subset(genes), binarize=False)
 
-        s = 0
-        C = (0, 1)
-
-        p_c = [float(data.num_samples(c)) / data.num_samples() for c in C]
+        p_c = [float(data.num_samples(c)) / data.num_samples() for c in self.C]
         assert sum(p_c) == 1
-        num_c_given_f = [0 for c in C]
-        for c in C:
+        num_c_given_f = [0 for c in self.C]
+
+        for c in self.C:
             num_f = 0
 
             equality = (expr_ptn == data.sample_gene).all(axis=1)
@@ -44,12 +42,13 @@ class State:
         if num_f == 0: return 0
         num_f = float(num_f)
 
+        s = 0
         if bound:
             s = max((num_c_given_f[c] / num_f) * np.log(1 / p_c[c])
-                    if p_c[c] != 0 else 0 for c in C)
+                    if p_c[c] != 0 else 0 for c in self.C)
         else:
             s = sum((num_c_given_f[c] / num_f) * np.log((num_c_given_f[c] / num_f) / p_c[c])
-                    if num_c_given_f[c] != 0 and p_c[c] != 0 else 0 for c in C)
+                    if num_c_given_f[c] != 0 and p_c[c] != 0 else 0 for c in self.C)
 
         p_f = num_f / data.num_samples()
         retval = p_f * s

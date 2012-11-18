@@ -5,9 +5,8 @@ from sklearn.preprocessing import scale
 
 class Expression:
     def __init__(self, expr_data, entrezs, labels, binarize=True, alpha=0.25):
-        '''
-        Creates a new expression object.
-        `expr_data` is a 2-d numpy array with (entrez, sample) as dimensions
+        '''Creates a new expression object.
+           `expr_data` is a 2-d numpy array with (entrez, sample) as dimensions.
         '''
         expr_data = np.array(expr_data)
         entrezs   = np.array(entrezs)
@@ -15,35 +14,31 @@ class Expression:
         assert len(entrezs) == expr_data.shape[0]
         assert len(labels)  == expr_data.shape[1]
 
-        data = expr_data
-
         if binarize:
             # Binarize the expression dataset by first normalizing by gene
             # (average expression of 0 and std of 1)
             # Then set the top `alpha` fraction of the entries in the
             # normalized gene expression matrix to 1 and the rest to 0
             # In the paper, Chowdhury uses `alpha` = 0.25
-            data = scale(data.astype(float), axis=1, with_mean=True, with_std=True)
+            expr_data = scale(expr_data.astype(float), axis=1, with_mean=True, with_std=True)
 
-            num_elements = data.size
+            num_elements = expr_data.size
             index = int(num_elements * (1 - alpha))
-            threshold = data.flatten()[ data.argsort(axis=None)[index] ]
+            threshold = expr_data.flatten()[ expr_data.argsort(axis=None)[index] ]
 
-            lt_threshold = data < threshold
-            gt_threshold = data >= threshold
-            data[lt_threshold] = 0
-            data[gt_threshold] = 1
-            data = data.astype(int)
+            lt_threshold = expr_data < threshold
+            gt_threshold = expr_data >= threshold
+            expr_data[lt_threshold] = 0
+            expr_data[gt_threshold] = 1
+            expr_data = expr_data.astype(int)
 
-        self.gene_sample = data
-        self.sample_gene = data.T
+        self.gene_sample = expr_data
+        self.sample_gene = expr_data.T
 
         self.entrezs = entrezs
         self.labels  = labels
 
-        self.eid_to_index = {}
-        for i, eid in enumerate(self.entrezs):
-            self.eid_to_index[eid] = i
+        self.eid_to_index = dict((eid, i) for i, eid in enumerate(self.entrezs))
 
     def subset(self, eids):
         '''Returns the information necessary for creating a new Expression object
