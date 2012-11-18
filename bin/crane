@@ -4,8 +4,11 @@ import sys
 import logging
 import argparse
 import pdb
-import cPickle as pickle
 import numpy as np
+try:
+    import cPickle as pickle
+except:
+    import pickle
 
 from crane.core import Core
 from crane.expression import Expression
