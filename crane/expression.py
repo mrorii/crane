@@ -60,6 +60,10 @@ class Expression:
         else:
             return len(self.labels)
 
+    def index_of_gene(self, gene):
+        assert gene in self.entrezs
+        return np.nonzero(self.entrezs == gene)[0][0]
+
     def iter_sample_label(self):
         '''Generator for samples and labels'''
         for sample, label in izip(self.sample_gene, self.labels):

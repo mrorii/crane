@@ -48,6 +48,9 @@ class TestExpression(unittest.TestCase):
                 alpha=alpha)
         self.assertEqual(expression.gene_sample.sum(), int(expression.gene_sample.size * alpha))
 
+    def test_index_of_gene(self):
+        self.assertEqual(self.expression.index_of_gene(2), 1)
+
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(unittest.TestLoader().loadTestsFromTestCase(TestExpression))

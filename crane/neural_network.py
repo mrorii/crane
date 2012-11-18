@@ -18,7 +18,6 @@ class NeuralNetwork:
         '''
         self.num_features    = sum(map(lambda tup: len(tup), states))
         self.states          = states
-        self.feature_indices = np.array([index - 1 for sublist in states for index in sublist])
 
         n = FeedForwardNetwork()
         n.addOutputModule(TanhLayer(1, name='out'))
@@ -36,6 +35,8 @@ class NeuralNetwork:
         self.n = n
 
     def train(self, expression):
+        self.expression = expression
+        self.feature_indices = self._calc_feature_indices()
         ds = SupervisedDataSet(self.num_features, 1)
         for sample, label in expression.iter_sample_label():
             feature = self._calc_feature(sample)
@@ -44,14 +45,21 @@ class NeuralNetwork:
         self.trainer = BackpropTrainer(self.n, ds)
         self.trainer.trainUntilConvergence()
 
-        self.expression = expression
-        self.ds         = ds
+        self.ds = ds
 
     def activate(self, sample):
         assert len(sample) == self.expression.num_genes()
         sample  = np.array(sample)
         feature = self._calc_feature(sample)
         return int(np.round(self.n.activate(feature)))
+
+    def _calc_feature_indices(self):
+        feature_indices = []
+        for substate in self.states:
+            for eid in substate:
+                index = self.expression.index_of_gene(eid)
+                feature_indices.append(index)
+        return np.array(feature_indices)
 
     def _calc_feature(self, sample):
         return sample[self.feature_indices]
