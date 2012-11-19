@@ -43,7 +43,7 @@ class Expression:
 
     def subset(self, eids):
         '''Returns the information necessary for creating a new Expression object
-        represeting the subset (slice) of the original data for the specified entrez IDs'''
+        representing the subset (slice) of the original data for the specified entrez IDs'''
         assert isinstance(eids, list)
         indices = np.array([self.eid_to_index[eid] for eid in eids])
 
