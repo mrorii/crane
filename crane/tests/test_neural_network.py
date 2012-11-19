@@ -35,6 +35,23 @@ class TestNeuralNetwork(unittest.TestCase):
         #     output = self.n.activate(sample)
         #     self.assertEqual(output, label)
 
+    def test_activate_with_entrez(self):
+        sample_entrez_labels = (((1,0), (1,4), 1),
+                                ((0,0), (1,4), 1),
+                                ((0,1), (1,4), 0),
+                                ((1,1), (1,4), 0))
+        # for sample, entrezs, label in sample_entrez_labels:
+        #     output = self.n.activate(sample, entrezs)
+        #     self.assertEqual(output, label)
+
+    def test_calc_feature(self):
+        sample_entrez_expected = (((9,7),   (1,4),   (9,0,0,0,7)),
+                                  ((9,7,8), (1,4,3), (9,0,8,0,7)))
+
+        for sample, entrezs, expected in sample_entrez_expected:
+             feature = self.n._calc_feature(sample, entrezs, missing=0)
+             np.testing.assert_array_equal(feature, expected)
+
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(unittest.TestLoader().loadTestsFromTestCase(TestNeuralNetwork))
