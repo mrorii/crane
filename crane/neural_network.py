@@ -61,7 +61,7 @@ class NeuralNetwork:
         '''
         sample  = np.array(sample)
         feature = self._calc_feature(sample, entrezs=entrezs, missing=missing)
-        return int(np.round(self.n.activate(feature)))
+        return self.n.activate(feature)
 
     def _calc_feature_indices(self):
         feature_indices = []
