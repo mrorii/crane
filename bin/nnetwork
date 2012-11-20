@@ -5,7 +5,8 @@ import logging
 import argparse
 import pdb
 import numpy as np
-from sklearn.metrics import precision_recall_fscore_support
+import pylab as pl
+from sklearn.metrics import precision_recall_fscore_support, precision_recall_curve, auc
 try:
     import cPickle as pickle
 except:
@@ -22,6 +23,17 @@ def read_states(filename):
             state = map(lambda num: int(num), columns[1].split(','))
             states.append(state)
     return states
+
+def plot_pr_curve(recall, precision, area, filename):
+    pl.clf()
+    pl.plot(recall, precision, label='Precision-Recall curve')
+    pl.xlabel('Recall')
+    pl.ylabel('Precision')
+    pl.ylim([0.0, 1.05])
+    pl.xlim([0.0, 1.0])
+    pl.title('Precision-Recall example: AUC=%0.2f' % area)
+    pl.legend(loc="lower left")
+    pl.savefig(filename)
 
 def main():
     logging.basicConfig(level=logging.INFO, format='%(message)s')
@@ -75,9 +87,12 @@ def main():
             y_true.append(label)
             y_pred.append(output)
 
-        print 'Precision: %.5f' % (precision[1])
-        print 'Recall:    %.5f' % (recall[1])
-        print 'F1:        %.5f' % (f1_score[1])
+        precision, recall, thresholds = \
+                precision_recall_curve(np.array(y_true), np.array(y_pred))
+        area = auc(recall, precision)
+        logging.info('AUC: %.5f' % area)
+        if args.plot:
+            plot_pr_curve(recall, precision, area, args.plot)
 
 if __name__ == '__main__':
     main()
