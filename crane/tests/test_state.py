@@ -48,6 +48,17 @@ class TestState(unittest.TestCase):
     def test_len(self):
         self.assertEqual(len(self.state), len(self.entrezs))
 
+    def test_calc_mutual_info(self):
+        all_entrezs = np.array([1,2,3,4])
+        labels      = np.array([1,1,1,0,0,0])
+        expr_data   = np.array([[1,1,1,0,0,0],
+                                [1,1,1,0,0,0],
+                                [1,1,1,0,0,0],
+                                [1,1,1,0,0,0]])
+        expression = Expression(expr_data, all_entrezs, labels, binarize=False)
+        state = State([1,2,3,4], [1,0,0,1], expression)
+        self.assertEqual(state.calc_mutual_info(), 1.0)
+
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(unittest.TestLoader().loadTestsFromTestCase(TestState))
