@@ -4,14 +4,14 @@ from expression import Expression
 import numpy as np
 
 class State:
-    def __init__(self, genes, expr_ptn, expr_data):
+    def __init__(self, genes, expr_ptn, expression):
         assert isinstance(genes, list)
         assert isinstance(expr_ptn, list)
         assert len(genes) == len(expr_ptn)
 
-        self.genes     = genes
-        self.expr_ptn  = expr_ptn
-        self.expr_data = expr_data
+        self.genes      = genes
+        self.expr_ptn   = expr_ptn
+        self.expression = expression
 
         self.calced_info = False
         self.info        = None
@@ -23,7 +23,7 @@ class State:
 
     def _calc_info(self, genes, expr_ptn, bound=False):
         assert len(genes) == len(expr_ptn)
-        data = Expression(*self.expr_data.subset(genes), binarize=False)
+        data = Expression(*self.expression.subset(genes), binarize=False)
 
         p_c = [float(data.num_samples(c)) / data.num_samples() for c in self.C]
         assert sum(p_c) == 1
@@ -63,7 +63,7 @@ class State:
 
     def calc_mutual_info(self):
         '''Calculates (full) mutual information I(F_S;C)'''
-        data = Expression(*self.expr_data.subset(self.genes), binarize=False)
+        data = Expression(*self.expression.subset(self.genes), binarize=False)
         counts_C = np.histogram(data.labels, bins=[0,1,2])[0]
 
         num_genes = data.num_genes()

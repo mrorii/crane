@@ -4,21 +4,21 @@ from state import State
 import logging
 
 class Core:
-    def __init__(self, graph, expr_data, d, b, j):
-        self.graph      = graph
-        self.expr_data  = expr_data
-        self.d          = d
-        self.b          = b
-        self.j          = j
-        self.T          = []
-        self.C          = (0, 1)
+    def __init__(self, graph, expression, d, b, j):
+        self.graph       = graph
+        self.expression  = expression
+        self.d           = d
+        self.b           = b
+        self.j           = j
+        self.T           = []
+        self.C           = (0, 1)
 
     def run(self):
         for i, node in enumerate(self.graph.nodes_iter()):
             if (i % 1000) == 0:
                 logging.info('Node %5d completed (%s states)' % (i, len(self.T)))
             for e in self.C:
-                state = State([node], [e], self.expr_data)
+                state = State([node], [e], self.expression)
                 self.extend_state(state)
 
     def extend_state(self, state):
@@ -35,7 +35,7 @@ class Core:
             if g_k in state: continue
 
             for e in self.C:
-                new_state = State(state.genes + [g_k], state.expr_ptn + [e], self.expr_data)
+                new_state = State(state.genes + [g_k], state.expr_ptn + [e], self.expression)
                 redundant = False
 
                 for g_j in state.iter_gene():
