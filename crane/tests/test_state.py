@@ -53,10 +53,10 @@ class TestState(unittest.TestCase):
         labels      = np.array([1,1,1,0,0,0])
         expr_data   = np.array([[1,1,1,0,0,0],
                                 [1,1,1,0,0,0],
-                                [1,1,1,0,0,0],
-                                [1,1,1,0,0,0]])
+                                [0,0,1,1,0,1],
+                                [0,1,0,0,1,0]])
         expression = Expression(expr_data, all_entrezs, labels, binarize=False)
-        state = State([1,2,3,4], [1,0,0,1], expression)
+        state = State([1,2], [1,0], expression)
         self.assertEqual(state.calc_mutual_info(), 1.0)
 
 def suite():

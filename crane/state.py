@@ -63,17 +63,18 @@ class State:
 
     def calc_mutual_info(self):
         '''Calculates (full) mutual information I(F_S;C)'''
-        counts_C = np.histogram(self.expr_data.labels, bins=[0,1,2])[0]
+        data = Expression(*self.expr_data.subset(self.genes), binarize=False)
+        counts_C = np.histogram(data.labels, bins=[0,1,2])[0]
 
-        num_genes = self.expr_data.num_genes()
+        num_genes = data.num_genes()
         bins = [[0,1,2] for i in xrange(num_genes)]
-        counts_E, _ = np.histogramdd(self.expr_data.sample_gene, bins=bins)
+        counts_E, _ = np.histogramdd(data.sample_gene, bins=bins)
         counts_E = counts_E.ravel()
 
         # hack using binary to decimal conversion
         samples_as_decimals = [int(''.join(sample.astype('str')), base=2)
-                for sample in self.expr_data.sample_gene]
-        counts_CE = np.histogram2d(self.expr_data.labels, samples_as_decimals,
+                for sample in data.sample_gene]
+        counts_CE = np.histogram2d(data.labels, samples_as_decimals,
                 bins=([0,1,2], range(2**num_genes + 1)))[0]
 
         H_CE = self._entropy(counts_CE)
