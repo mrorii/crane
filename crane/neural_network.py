@@ -43,7 +43,8 @@ class NeuralNetwork:
             feature = self._calc_feature(sample)
             ds.addSample(feature, (label,))
 
-        self.trainer = BackpropTrainer(self.n, ds)
+        self.trainer = BackpropTrainer(self.n, dataset=ds, learningrate=0.01, lrdecay=1.0,
+                momentum=0.1, verbose=True)
         self.trainer.trainUntilConvergence()
 
         self.ds = ds
