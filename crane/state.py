@@ -82,6 +82,7 @@ class State:
         return H_C + H_E - H_CE
 
     def calc_info(self):
+        '''Calculates (partial) mutual information J(f_S;C)'''
         if self.calced_info:
             return self.info
 
@@ -90,9 +91,10 @@ class State:
         return self.info
 
     def calc_info_omit(self, gene):
+        '''Calculates (partial) mutual information J(f_S\{g_j};C)'''
         assert gene in self.genes
 
-        genes    = list(self.genes) # clones list
+        genes    = list(self.genes)    # clones list
         expr_ptn = list(self.expr_ptn) # clones list
 
         index = genes.index(gene)
@@ -101,6 +103,7 @@ class State:
         return self._calc_info(genes, expr_ptn)
 
     def calc_info_bound(self):
+        '''Calculates (partial) mutual information J_{bound}(f_S;C)'''
         return self._calc_info(self.genes, self.expr_ptn, bound=True)
 
     def iter_gene(self):

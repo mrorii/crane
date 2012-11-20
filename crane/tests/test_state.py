@@ -8,7 +8,7 @@ from crane.state import State
 
 class TestState(unittest.TestCase):
     def setUp(self):
-        all_entrezs   = np.array([1,2,3,4])
+        all_entrezs    = np.array([1,2,3,4])
         self.labels    = np.array([1,1,1,0,0,0])
         self.expr_data = np.array([[1,0,1,1,0,1],
                                    [0,1,0,1,0,1],
