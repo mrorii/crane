@@ -10,12 +10,14 @@ from pybrain.supervised.trainers import BackpropTrainer
 from pybrain.datasets import SupervisedDataSet
 
 class NeuralNetwork:
-    def __init__(self, states):
+    def __init__(self, states, verbose=False, max_epochs=None):
         '''Create a NeuralNetwork instance.
 
         `states` is a tuple of tuples of ints, representing the discovered subnetworks'
         entrez ids.
         '''
+        self.verbose         = verbose
+        self.max_epochs      = max_epochs
         self.num_features    = sum(map(lambda tup: len(tup), states))
         self.states          = states
 
@@ -44,8 +46,8 @@ class NeuralNetwork:
             ds.addSample(feature, (label,))
 
         self.trainer = BackpropTrainer(self.n, dataset=ds, learningrate=0.01, lrdecay=1.0,
-                momentum=0.1, verbose=True)
-        self.trainer.trainUntilConvergence()
+                momentum=0.1, verbose=self.verbose)
+        self.trainer.trainUntilConvergence(maxEpochs=self.max_epochs)
 
         self.ds = ds
 
