@@ -14,7 +14,9 @@ class State:
         self.expression = expression
 
         self.calced_info = False
+        self.calced_mi   = False
         self.info        = None
+        self.mi          = None
         self.C           = (0, 1)
 
     def most_recent_gene(self):
@@ -61,8 +63,7 @@ class State:
         H = -np.sum(ps * np.log2(ps))
         return H
 
-    def calc_mutual_info(self):
-        '''Calculates (full) mutual information I(F_S;C)'''
+    def _calc_mutual_info(self):
         data = Expression(*self.expression.subset(self.genes), binarize=False)
         counts_C = np.histogram(data.labels, bins=[0,1,2])[0]
 
@@ -81,6 +82,15 @@ class State:
         H_C  = self._entropy(counts_C)
         H_E  = self._entropy(counts_E)
         return H_C + H_E - H_CE
+
+    def calc_mutual_info(self):
+        '''Calculates (full) mutual information I(F_S;C)'''
+        if self.calced_mi:
+            return self.mi
+
+        self.calced_mi = True
+        self.mi = self._calc_mutual_info()
+        return self.mi
 
     def calc_info(self):
         '''Calculates (partial) mutual information J(f_S;C)'''
