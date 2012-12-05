@@ -31,6 +31,8 @@ def main():
     parser.add_argument('--j', help='j: Threshold on information provided by a state ' \
                                'function on phenotype', type=float, default=0.4)
     parser.add_argument('--alpha', help='alpha: cutoff ratio for H/L', type=float, default=0.25)
+    parser.add_argument('--output1', help='output-partial', required=True)
+    parser.add_argument('--output2', help='output-full MI', required=True)
     args = parser.parse_args()
 
     graph     = pickle.load(open(args.graph))
@@ -45,10 +47,17 @@ def main():
     crane.run()
     logging.info('Done running crane')
 
-    for state in reversed(sorted(crane.T)):
-        print '%.8f\t%s\t%s' % (state.calc_info(),
-                ','.join(map(lambda gene: str(gene), state.genes)),
-                ','.join(map(lambda ptn: str(ptn), state.expr_ptn)))
+    with open(args.output1, 'w') as f:
+        for state in reversed(sorted(crane.T)):
+            f.write('%.8f\t%s\t%s\n' % (state.calc_info(),
+                    ','.join(map(lambda gene: str(gene), state.genes)),
+                    ','.join(map(lambda ptn: str(ptn), state.expr_ptn))))
+
+    with open(args.output2, 'w') as f:
+        for state in reversed(sorted(crane.T, key=lambda state: state.calc_mutual_info())):
+            f.write('%.8f\t%s\t%s\n' % (state.calc_mutual_info(),
+                    ','.join(map(lambda gene: str(gene), state.genes)),
+                    ','.join(map(lambda ptn: str(ptn), state.expr_ptn))))
 
 if __name__ == '__main__':
     main()
