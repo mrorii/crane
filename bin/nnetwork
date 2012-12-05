@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys
+import os
 import logging
 import argparse
 import pdb
@@ -24,6 +25,22 @@ def read_states(filename):
             states.append(state)
     return states
 
+def disjoint_states(states, K=10):
+    seen_genes = set()
+
+    retval = []
+    for state in states:
+        if len(retval) == K:
+            break
+
+        genes = map(lambda num: int(num), state)
+        if seen_genes.intersection(genes):
+            continue
+
+        seen_genes.update(genes)
+        retval.append(genes)
+    return retval
+
 def plot_pr_curve(recall, precision, area, filename):
     pl.clf()
     pl.plot(recall, precision, label='Precision-Recall curve')
@@ -31,21 +48,56 @@ def plot_pr_curve(recall, precision, area, filename):
     pl.ylabel('Precision')
     pl.ylim([0.0, 1.05])
     pl.xlim([0.0, 1.0])
-    pl.title('Precision-Recall example: AUC=%0.2f' % area)
+    pl.title('Precision-Recall: AUC=%0.5f' % area)
     pl.legend(loc="lower left")
     pl.savefig(filename)
+
+def train(states, expression, args):
+    logging.info('Training network')
+    networks = []
+    for i in xrange(args.N):
+        logging.info('Training network %s...' % (i+1))
+        n = NeuralNetwork(states, verbose=args.verbose, max_epochs=args.maxepochs)
+        n.train(expression)
+        networks.append(n)
+    logging.info('Done training network')
+    if args.model:
+        with open(args.model, 'w') as f:
+            pickle.dump(networks, f)
+    return networks
+
+def test(expression, args):
+    networks = pickle.load(open(args.model))
+
+    y_true = []
+    y_pred = []
+    entrezs = list(expression.entrezs)
+
+    for sample, label in expression.iter_sample_label():
+        outputs = [n.activate(sample, entrezs=entrezs, missing=0) for n in networks]
+        output = np.average(outputs)
+
+        y_true.append(label)
+        y_pred.append(output)
+
+    precision, recall, thresholds = \
+            precision_recall_curve(np.array(y_true), np.array(y_pred))
+    area = auc(recall, precision)
+    logging.info('AUC: %.5f' % area)
+    if args.plot:
+        plot_pr_curve(recall, precision, area, args.plot)
 
 def main():
     logging.basicConfig(level=logging.INFO, format='%(message)s')
 
     parser = argparse.ArgumentParser(
-        description='Run neural network on resulting subnetworks from crane',
+        description='Run neural network on resulting subnetworks from CRANE',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument('--expr', help='Path to expression data', required=True)
     parser.add_argument('--label', help='Path to labels (phenotype/control)', required=True)
     parser.add_argument('--eid', help='Path to list of entrez IDs', required=True)
-    parser.add_argument('--subgraphs', help='Path to the resulting subnetworks from crane',
+    parser.add_argument('--subgraphs', help='Path to the resulting subnetworks from CRANE',
             required=True)
     parser.add_argument('--model', help='Path to write/read model', required=True)
     parser.add_argument('--phase', choices=['train', 'test'], required=True)
@@ -53,46 +105,32 @@ def main():
     parser.add_argument('--K', help='K: top K states to use', type=int, default=10)
     parser.add_argument('--N', help='N: number of neural nets to train', type=int, default=1)
     parser.add_argument('--plot', help='Path to plot pr curve')
+    parser.add_argument('--verbose', help='Verbose', type=bool, default=False)
+    parser.add_argument('--maxepochs', help='Max epochs for training network', type=int,
+            default=1000)
     args = parser.parse_args()
+
+    if not os.path.exists(args.subgraphs):
+        sys.stderr.write('States file not found!')
+        sys.exit(1)
+
+    states = read_states(args.subgraphs)
+    states = disjoint_states(states, K=args.K)
+    logging.info('States: %s' % states)
+
+    if not states:
+        sys.stderr.write('Empty states!\n')
+        sys.exit(1)
 
     expr_data = np.loadtxt(open(args.expr))
     eids      = np.array(map(lambda l: int(l.strip()), open(args.eid)))
     labels    = np.array(map(lambda l: int(l.strip()), open(args.label)))
     expression = Expression(expr_data, eids, labels, binarize=True, alpha=args.alpha)
-    
-    states = read_states(args.subgraphs)[:args.K]
-    logging.info('States: %s' % states)
 
     if args.phase == 'train':
-        logging.info('Training network')
-        networks = []
-        for i in xrange(args.N):
-            logging.info('Training network %s...' % (i+1))
-            n = NeuralNetwork(states)
-            n.train(expression)
-            networks.append(n)
-        logging.info('Done training network')
-        with open(args.model, 'w') as f:
-            pickle.dump(networks, f)
+        train(states, expression, args)
     elif args.phase == 'test':
-        networks = pickle.load(open(args.model))
-
-        y_true = []
-        y_pred = []
-        
-        for sample, label in expression.iter_sample_label():
-            outputs = [n.activate(sample) for n in networks]
-            output = np.average(outputs)
-
-            y_true.append(label)
-            y_pred.append(output)
-
-        precision, recall, thresholds = \
-                precision_recall_curve(np.array(y_true), np.array(y_pred))
-        area = auc(recall, precision)
-        logging.info('AUC: %.5f' % area)
-        if args.plot:
-            plot_pr_curve(recall, precision, area, args.plot)
+        test(expression, args)
 
 if __name__ == '__main__':
     main()
